@@ -5,6 +5,9 @@ This configuration supports two modes:
 - **Standalone Mode**: Right keyboard acts as central, connects directly to host
 - **Dongle Mode**: Dedicated dongle with display acts as central, both keyboards connect to it
 
+
+
+
 ## Table of Contents
 
 - [ZMK CONFIG FOR THE CHARYBDIS 4X6 WIRELESS SPLIT KEYBOARD ZEPHYR 4.1](#zmk-config-for-the-charybdis-4x6-wireless-split-keyboard-zephyr-41)
