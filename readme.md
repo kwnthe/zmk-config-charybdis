@@ -7,7 +7,7 @@ This configuration supports two modes:
 
 
 
-
+d
 ## Table of Contents
 
 - [ZMK CONFIG FOR THE CHARYBDIS 4X6 WIRELESS SPLIT KEYBOARD ZEPHYR 4.1](#zmk-config-for-the-charybdis-4x6-wireless-split-keyboard-zephyr-41)
