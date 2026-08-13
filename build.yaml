@@ -5,10 +5,9 @@ include:
   shield: charybdis_left
 
 # Standalone mode - right keyboard is primary/central
+# TEMP DEBUG: Studio disabled + USB logging enabled to diagnose trackball. Revert after.
 - board: nice_nano//zmk
   shield: charybdis_right_standalone
-  snippet: studio-rpc-usb-uart
-  cmake-args: -DCONFIG_ZMK_STUDIO=y
 
 # Dongle mode - prospector dongle is primary/central with display, right is peripheral
 - board: nice_nano//zmk
