@@ -18,3 +18,16 @@
         CHARYBDIS_TRACKBALL_PROCESSORS
     };
 };
+
+/* TEMP DEBUG: USB CDC ACM console so ZMK USB logging builds under Zephyr 4.1. Revert after. */
+&zephyr_udc0 {
+    cdc_acm_uart0: cdc_acm_uart0 {
+        compatible = "zephyr,cdc-acm-uart";
+    };
+};
+
+/ {
+    chosen {
+        zephyr,console = &cdc_acm_uart0;
+    };
+};
