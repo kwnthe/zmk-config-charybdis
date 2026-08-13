@@ -189,11 +189,11 @@
 // ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮
     &kp ESC       &kp N1        &kp N2        &kp N3        &kp N4        &kp N5            &kp N6        &kp N7        &kp N8        &kp N9        &kp N0        &kp DEL
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &kp TAB       &kp Q         &kp W         &kp E         &kp R         &kp T             &kp Y         &kp U         &kp I         &kp O         &kp P         &kp BSLH
+    &kp TAB       &kp Q         &kp W         &kp F         &kp P         &kp B             &kp J         &kp L         &kp U         &kp Y         &kp SEMI      &kp BSLH
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &kp RCTRL     &kp A         &kp S         &kp D         &kp F         &kp G             &kp H         &kp J         &kp K         &kp L         &kp SEMI      &kp SQT
+    &kp RCTRL     &kp A         &kp R         &kp S         &kp T         &kp G             &kp M         &kp N         &kp E         &kp I         &kp O         &kp SQT
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &kp LSFT      &hml LGUI Z   &hml LALT X   &hml LCTRL C  &hml LSHIFT V &kp B             &kp N         &hmr RSHIFT M &hmr RCTRL COMMA &hmr RALT DOT &hmr RGUI FSLH &kp RSFT
+    &kp LSFT      &hml LGUI Z   &hml LALT X   &hml LCTRL C  &hml LSHIFT D &kp V             &kp K         &hmr RSHIFT H &hmr RCTRL COMMA &hmr RALT DOT &hmr RGUI FSLH &kp RSFT
 // ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
 //               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
                   &lalt_dt      &mo LOWER     &mo POINTER   &gui_ctrlb    &kp LCTRL         &kp RET      &blt SYMBOLS SPACE  &blt RAISE BSPC
@@ -263,13 +263,13 @@
       display-name = "Symbols";
       bindings = <
 // ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮
-    &kp GRAVE     &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans        &trans        &trans        &trans
+    &kp TILDE     &kp EXCL      &kp AT        &kp HASH      &kp DLLR      &kp PRCNT         &kp CARET     &kp C_VOL_DN  &kp C_PP      &kp C_VOL_UP  &none         &none
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &kp TILDE     &kp SQT       &kp LT        &kp GT        &kp DQT       &kp DOT           &kp COMMA     &kp AMPS      &kp LBKT      &kp RBKT      &kp PRCNT     &trans
+    &trans        &none         &none         &trans        &none         &kp LBKT          &kp RBKT      &kp N7        &kp N8        &kp N9        &trans        &kp PLUS
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &trans        &kp EXCL      &kp MINUS     &kp PLUS      &kp EQUAL     &kp UNDER         &kp PIPE      &kp COLON     &kp LPAR      &kp RPAR      &kp QMARK     &trans
+    &trans        &kp LEFT      &kp UP        &kp DOWN      &kp RIGHT     &none             &none         &kp N4        &kp N5        &kp N6        &kp MINUS     &kp PIPE
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &trans        &kp CARET     &kp FSLH      &kp ASTRK     &kp BSLH      &kp HASH          &kp TILDE     &kp DLLR      &kp LBRC      &kp RBRC      &kp AT        &trans
+    &trans        &kp HOME      &kp PG_UP     &kp PG_DN     &kp END       &trans            &kp N0        &kp N1        &kp N2        &kp N3        &kp EQUAL     &kp UNDER
 // ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
 //               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
                     &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans
