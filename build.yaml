@@ -10,6 +10,19 @@ include:
   snippet: studio-rpc-usb-uart
   cmake-args: -DCONFIG_ZMK_STUDIO=y
 
+# TEMP DEBUG: extra builds with USB logging enabled, for diagnosing the dead column.
+# Flash these instead of the normal firmware, open the CDC-ACM serial port, press keys,
+# and watch for "Sending event at <row>,<col>". Delete these two entries when done.
+- board: nice_nano//zmk
+  shield: charybdis_left
+  snippet: zmk-usb-logging
+  artifact-name: DEBUG-usb-logging-charybdis_left
+
+- board: nice_nano//zmk
+  shield: charybdis_right_standalone
+  snippet: zmk-usb-logging
+  artifact-name: DEBUG-usb-logging-charybdis_right_standalone
+
 # Dongle mode - prospector dongle is primary/central with display, right is peripheral
 - board: nice_nano//zmk
   shield: dongle_charybdis_right
