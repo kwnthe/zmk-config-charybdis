@@ -4,6 +4,7 @@
 #include <input/processors.dtsi>
 #include "charybdis_layers.h"
 #include "charybdis_trackball_processors.dtsi"
+#include "charybdis_cpi_behavior.dtsi"
 
 / {
 	chosen {

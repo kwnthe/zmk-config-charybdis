@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2026 The ZMK Contributors
+ * SPDX-License-Identifier: MIT
+ *
+ * &tb_cpi has to exist in EVERY shield that compiles config/charybdis.keymap -- left
+ * half, right half and all the dongles share one keymap file, and a keymap referencing
+ * a node the shield never defines is a build error. Only the half holding the sensor
+ * fills in `device` (see charybdis_right_common.dtsi); elsewhere the behavior is a
+ * harmless no-op.
+ */
+
+#pragma once
+
+/ {
+    behaviors {
+        tb_cpi: behavior_trackball_cpi {
+            compatible = "zmk,behavior-trackball-cpi";
+            #binding-cells = <1>;
+
+            /* Keep cpi-default in step with `cpi` on the trackball node. */
+            cpi-min = <200>;
+            cpi-max = <3200>;
+            cpi-step = <200>;
+            cpi-default = <1600>;
+        };
+    };
+};

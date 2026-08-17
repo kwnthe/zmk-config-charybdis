@@ -97,3 +97,9 @@
     };
 };
 
+/* This is the only build that physically owns the sensor, so it is the only one that
+ * can wire &tb_cpi to it. Everywhere else the behavior stays deviceless and no-ops. */
+&tb_cpi {
+    device = <&trackball>;
+};
+

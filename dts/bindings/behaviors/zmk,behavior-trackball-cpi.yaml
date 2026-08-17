@@ -1,0 +1,47 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Changes the trackball sensor's CPI at runtime.
+
+  param1 is either one of the CPI_INC / CPI_DEC / CPI_RESET commands from
+  dt-bindings/charybdis/cpi.h, or an absolute CPI value (>= 200).
+
+compatible: "zmk,behavior-trackball-cpi"
+
+include: one_param.yaml
+
+properties:
+  device:
+    type: phandle
+    required: false
+    description: |
+      The sensor to drive. Optional on purpose: the keymap is shared by every shield,
+      but only the half that physically carries the trackball can define this. Where
+      it is absent the behavior instantiates and no-ops, which keeps the dongle and
+      left-half builds compiling against the same keymap.
+
+  cpi-min:
+    type: int
+    default: 200
+    description: Lower clamp. PMW3610_MIN_CPI.
+
+  cpi-max:
+    type: int
+    default: 3200
+    description: Upper clamp. PMW3610_MAX_CPI.
+
+  cpi-step:
+    type: int
+    default: 200
+    description: |
+      Increment for CPI_INC / CPI_DEC. Also the rounding quantum: the driver computes
+      the register value as cpi/200 with integer truncation, so anything that is not a
+      multiple of this silently rounds down.
+
+  cpi-default:
+    type: int
+    default: 1600
+    description: |
+      Startup value and the CPI_RESET target. Must match the `cpi` property on the
+      sensor node -- nothing reads it back from the hardware.

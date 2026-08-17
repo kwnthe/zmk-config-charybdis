@@ -3,6 +3,7 @@
 #include <input/processors.dtsi>
 #include <physical_layouts.dtsi>
 #include "charybdis_layers.h"
+#include "charybdis_cpi_behavior.dtsi"
 
 / {
     chosen {
