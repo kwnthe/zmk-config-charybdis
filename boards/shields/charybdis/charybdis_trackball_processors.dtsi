@@ -16,19 +16,26 @@
 
 // Standard trackball processing configuration
 // Can be used in both standalone (trackball_listener) and dongle mode (input_split_listener)
+//
+// Every divisor here is relative to `cpi` in charybdis_right_common.dtsi (1600).
+// Effective resolution = cpi * mul / div:
+//   move  1600 * 3/8   =  600    snipe 1600 * 1/12 = 133    scroll 1600 * 1/160 = 10
+// These are the same effective speeds as the old cpi=400 setup, but sampled at 4x
+// the resolution, so slow motion is smooth instead of stepping. If you change cpi,
+// scale all three divisors by the same factor or the feel shifts on every layer.
 #define CHARYBDIS_TRACKBALL_PROCESSORS \
     snipe { \
         layers = <SNIPING>; \
-        input-processors = <&zip_xy_scaler 1 3>; \
+        input-processors = <&zip_xy_scaler 1 12>; \
     }; \
     \
     scroll { \
         layers = <SCROLL>; \
-        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 40>, <&zip_xy_to_scroll_mapper>; \
+        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
     }; \
     \
     move { \
         layers = <BASE POINTER>; \
-        input-processors = <&zip_xy_scaler 3 2>; \
+        input-processors = <&zip_xy_scaler 3 8>; \
     };
 

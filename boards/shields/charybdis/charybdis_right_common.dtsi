@@ -73,7 +73,13 @@
         reg = <0>;
         spi-max-frequency = <500000>;  // lowered from 2MHz for handwired signal-integrity margin (LSB bit errors -> 0x3f)
         irq-gpios = <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-        cpi = <800>;  // range 200-3200, step 200 (multiples of 200)
+        // Sample high and scale DOWN in the input processors, never up: the sensor
+        // reports integer counts, so a multiplier >1 anywhere just magnifies the
+        // quantisation step. The scalers divide with remainder accumulation
+        // (input_processor_scaler.c), so dividing is lossless in aggregate.
+        // Every divisor in charybdis_trackball_processors.dtsi is sized against this
+        // value -- change one, change all four.
+        cpi = <1600>;  // range 200-3200, step 200 (multiples of 200)
         swap-xy;
         invert-x;
         invert-y;
