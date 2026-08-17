@@ -73,7 +73,7 @@
         reg = <0>;
         spi-max-frequency = <500000>;  // lowered from 2MHz for handwired signal-integrity margin (LSB bit errors -> 0x3f)
         irq-gpios = <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-        cpi = <1600>;  // range 200-3200, step 200 (driver truncates cpi/200, so use exact multiples)
+        cpi = <400>;  // lowered from 1600 to slow the pointer; range 200-3200, step 200 (multiples of 200)
         swap-xy;
         invert-x;
         invert-y;
