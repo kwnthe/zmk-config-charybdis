@@ -17,4 +17,5 @@
 #define SCROLL 5
 #define SNIPING 6
 #define GAMING 7
+#define AUTO_MOUSE 8
 

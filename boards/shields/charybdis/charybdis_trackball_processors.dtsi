@@ -14,6 +14,22 @@
 #include <dt-bindings/zmk/input_transform.h>
 #include <input/processors.dtsi>
 
+// Single global instance (the driver uses DEVICE_DT_INST_GET(0)), so these apply to
+// every &zip_temp_layer reference below.
+&zip_temp_layer {
+    // Brushing the ball mid-typing must NOT raise the mouse layer. The thumb rests
+    // right next to it on a Charybdis, so this is the property that makes the whole
+    // thing usable: should_quick_tap() suppresses activation for this long after any
+    // keystroke.
+    require-prior-idle-ms = <300>;
+
+    // Counter-intuitive semantics, straight from input_processor_temp_layer.c: with an
+    // EMPTY list nothing ever deactivates the layer early, it only times out. Once the
+    // list is non-empty, any position NOT in it deactivates immediately. So this is the
+    // set of keys usable without dropping the layer -- i.e. exactly what AUTO_MOUSE binds.
+    excluded-positions = <15 16 17 27 28 29 41>;
+};
+
 // Standard trackball processing configuration
 // Can be used in both standalone (trackball_listener) and dongle mode (input_split_listener)
 //
@@ -23,19 +39,26 @@
 // These are the same effective speeds as the old cpi=400 setup, but sampled at 4x
 // the resolution, so slow motion is smooth instead of stepping. If you change cpi,
 // scale all three divisors by the same factor or the feel shifts on every layer.
+// &zip_temp_layer AUTO_MOUSE 500 is repeated in all three chains on purpose.
+// input_listener.c walks these children in declaration order and stops at the first
+// whose layer_mask is active (`if (!override->process_next) return 0;`). So while
+// SNIPING or SCROLL is held, the `move` chain never runs -- without the processor in
+// those chains too, AUTO_MOUSE would time out from under you mid-snipe.
+// `move` needs no AUTO_MOUSE in its `layers`: BASE is always active, so it already
+// matches as the catch-all.
 #define CHARYBDIS_TRACKBALL_PROCESSORS \
     snipe { \
         layers = <SNIPING>; \
-        input-processors = <&zip_xy_scaler 1 12>; \
+        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 12>; \
     }; \
     \
     scroll { \
         layers = <SCROLL>; \
-        input-processors = <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
+        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
     }; \
     \
     move { \
         layers = <BASE POINTER>; \
-        input-processors = <&zip_xy_scaler 3 8>; \
+        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 8>; \
     };
 

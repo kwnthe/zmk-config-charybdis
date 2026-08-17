@@ -31,6 +31,7 @@
 #define SCROLL 5
 #define SNIPING 6
 #define GAMING 7
+#define AUTO_MOUSE 8   // activated by trackball motion, not by a key -- see charybdis_trackball_processors.dtsi
 
 / {
   behaviors {
@@ -333,6 +334,31 @@
 // ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
 //               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
                   &trans        &trans        &kp SPACE     &trans        &trans            &trans        &trans        &trans
+//               ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────╯
+      >;
+    };
+
+    // Raised automatically by trackball motion (&zip_temp_layer), never by a key.
+    // Deliberately minimal: only the clicks, on the same positions POINTER uses, so
+    // muscle memory carries over. Everything else is &trans and falls through to
+    // whatever is underneath -- typing is untouched.
+    // The positions bound here are the excluded-positions list on &zip_temp_layer;
+    // pressing anything NOT bound here drops the layer instantly.
+    auto_mouse_layer {
+      label = "AUTOMOUSE";
+      display-name = "AutoMouse";
+      bindings = <
+// ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮
+    &trans        &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans        &trans        &trans        &trans
+// ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
+    &trans        &trans        &trans        &mo SNIPING   &mkp MB4      &mkp MB5          &trans        &trans        &trans        &trans        &trans        &trans
+// ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
+    &trans        &trans        &trans        &mkp RCLK     &mkp LCLK     &mkp MCLK         &trans        &trans        &trans        &trans        &trans        &trans
+// ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
+    &trans        &trans        &trans        &trans        &trans        &mo SCROLL        &trans        &trans        &trans        &trans        &trans        &trans
+// ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
+//               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
+                  &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans
 //               ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────╯
       >;
     };
