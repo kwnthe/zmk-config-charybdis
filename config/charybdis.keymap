@@ -274,7 +274,7 @@
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
     &trans        &kp LEFT      &kp UP        &kp DOWN      &kp RIGHT     &none             &none         &kp N4        &kp N5        &kp N6        &kp MINUS     &kp PIPE
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &trans        &kp HOME      &kp PG_UP     &kp PG_DN     &kp END       &tog SCROLL       &kp N0        &kp N1        &kp N2        &kp N3        &kp EQUAL     &kp UNDER
+    &trans        &kp HOME      &kp PG_UP     &kp PG_DN     &kp END       &mo SCROLL        &kp N0        &kp N1        &kp N2        &kp N3        &kp EQUAL     &kp UNDER
 // ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
 //               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
                     &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans
@@ -282,9 +282,12 @@
       >;
     };
 
-    // Reached three ways: &mo SCROLL (held) from POINTER/AUTO_MOUSE at position 41, or
-    // &tog SCROLL (latched) from SYMBOLS at the same position. Position 41 below closes
-    // the latch -- SCROLL outranks SYMBOLS, so the key has to be answered from here.
+    // Held via &mo SCROLL at position 41, from POINTER, AUTO_MOUSE or SYMBOLS alike.
+    // Position 41 here stays &trans: with &mo the release is handled by whichever
+    // binding answered the press, so this layer needs no exit key of its own.
+    // Usable one-handed despite SYMBOLS living on the right thumb -- press and hold
+    // 41, then let SYMBOLS go. &mo keeps SCROLL up independently of what raised it,
+    // which frees the thumb for the ball.
     scroll_layer {
       label = "SCROLL";
       display-name = "Scroll";
@@ -296,7 +299,7 @@
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
     &trans        &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans        &trans        &trans        &trans
 // ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
-    &trans        &trans        &trans        &trans        &trans        &tog SCROLL       &trans        &trans        &trans        &trans        &trans        &trans
+    &trans        &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans        &trans        &trans        &trans
 // ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯   ╰─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────╯
 //               ╭─────────────┬─────────────┬─────────────┬─────────────┬─────────────╮   ╭─────────────┬─────────────┬─────────────╮
                     &trans        &trans        &trans        &trans        &trans            &trans        &trans        &trans
