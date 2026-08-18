@@ -166,7 +166,8 @@ static const struct behavior_driver_api behavior_tb_cpi_driver_api = {
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_tb_cpi_init, NULL, &behavior_tb_cpi_data_##n,              \
                             &behavior_tb_cpi_config_##n, POST_KERNEL,                              \
-                            CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &behavior_tb_cpi_driver_api);
+                            CONFIG_ZMK_BEHAVIOR_TRACKBALL_CPI_INIT_PRIORITY,                       \
+                            &behavior_tb_cpi_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(TB_CPI_INST)
 

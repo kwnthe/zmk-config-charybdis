@@ -9,3 +9,17 @@ config ZMK_BEHAVIOR_TRACKBALL_CPI
       Builds &tb_cpi, which retunes the PMW3610's CPI from a key. The dependency is
       generated from the compatible, so this stays off in any build whose devicetree
       has no such node.
+
+config ZMK_BEHAVIOR_TRACKBALL_CPI_INIT_PRIORITY
+    int "Runtime trackball CPI behavior init priority"
+    default 90
+    range 0 99
+    depends on ZMK_BEHAVIOR_TRACKBALL_CPI
+    help
+      POST_KERNEL priority. The `device` phandle makes the sensor a devicetree
+      dependency, and Zephyr's init-priority check rejects the build unless this
+      behavior initializes after it -- the PMW3610 sits at INPUT_INIT_PRIORITY.
+      Referencing the driver's own Kconfig symbol is not an option here: it does not
+      exist in the left-half and dongle builds, which instantiate this behavior
+      without a sensor. Hence a plain number, chosen to land well after any input
+      device while staying inside POST_KERNEL.
