@@ -35,10 +35,13 @@
 //
 // Every divisor here is relative to `cpi` in charybdis_right_common.dtsi (1600).
 // Effective resolution = cpi * mul / div:
-//   move  1600 * 3/8   =  600    snipe 1600 * 1/12 = 133    scroll 1600 * 1/160 = 10
-// These are the same effective speeds as the old cpi=400 setup, but sampled at 4x
-// the resolution, so slow motion is smooth instead of stepping. If you change cpi,
-// scale all three divisors by the same factor or the feel shifts on every layer.
+//   move  1600 * 3/4  = 1200    snipe 1600 * 1/6 = 267    scroll 1600 * 1/160 = 10
+// move/snipe hold the 4.5x ratio the original cpi=400 setup had, at twice its speed --
+// 600 effective was ~5 thumb sweeps to cross a screen. cpi stays high because it buys
+// resolution, not speed: the divisors here set the speed, and dividing is lossless
+// (input_processor_scaler.c accumulates the remainder) while multiplying is not.
+// Scroll is left alone: how fast a page scrolls is its own preference, unrelated to
+// pointer speed. If you change cpi, rescale all three or the feel shifts everywhere.
 // &zip_temp_layer AUTO_MOUSE 500 is repeated in all three chains on purpose.
 // input_listener.c walks these children in declaration order and stops at the first
 // whose layer_mask is active (`if (!override->process_next) return 0;`). So while
@@ -49,7 +52,7 @@
 #define CHARYBDIS_TRACKBALL_PROCESSORS \
     snipe { \
         layers = <SNIPING>; \
-        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 12>; \
+        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 6>; \
     }; \
     \
     scroll { \
@@ -59,6 +62,6 @@
     \
     move { \
         layers = <BASE POINTER>; \
-        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 8>; \
+        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 4>; \
     };
 
