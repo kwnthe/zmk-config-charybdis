@@ -10,9 +10,11 @@ include:
   snippet: studio-rpc-usb-uart
   cmake-args: -DCONFIG_ZMK_STUDIO=y
 
-# TEMP DEBUG: extra builds with USB logging enabled, for diagnosing the dead column.
-# Flash these instead of the normal firmware, open the CDC-ACM serial port, press keys,
-# and watch for "Sending event at <row>,<col>". Delete these two entries when done.
+# Kept deliberately: USB-logging variants of both halves. Flash one instead of the
+# normal firmware, open the CDC-ACM serial port and watch the log -- "Sending event at
+# <row>,<col>" for matrix problems, and the LOG_INF from behavior_trackball_cpi.c /
+# input_processor_auto_layer.c for trackball and auto-mouse-layer behaviour. Originally
+# added for a dead column (since fixed); useful enough to keep around.
 - board: nice_nano//zmk
   shield: charybdis_left
   snippet: zmk-usb-logging
