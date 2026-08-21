@@ -27,7 +27,12 @@
     // EMPTY list nothing ever deactivates the layer early, it only times out. Once the
     // list is non-empty, any position NOT in it deactivates immediately. So this is the
     // set of keys usable without dropping the layer -- i.e. exactly what AUTO_MOUSE binds.
-    excluded-positions = <15 16 17 27 28 29 41>;
+    // Keep this in step with every non-transparent binding on AUTO_MOUSE, including
+    // ones added later from a keymap editor: a position bound on that layer but missing
+    // here is dead on arrival, because the layer drops before the binding resolves.
+    //   15 F=snipe  16 P=MB4  17 B=MB5  25 A=scroll  26 R=scroll  27 S=RCLK
+    //   28 T=LCLK   29 G=MCLK 39 C=scroll 41 V=scroll 44 ,=LCLK   45 .=RCLK
+    excluded-positions = <15 16 17 25 26 27 28 29 39 41 44 45>;
 };
 
 // Standard trackball processing configuration
