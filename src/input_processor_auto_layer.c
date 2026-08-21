@@ -10,9 +10,10 @@
  * layer. Every binding added from a keymap editor then needs a matching firmware edit.
  *
  * This one asks the keymap instead. On each press it reads the binding the target
- * layer carries at that position and treats &trans / &none as "not mine" -- ignored,
- * the layer goes on expiring -- and anything else as "mine", which refreshes the
- * timeout so the layer survives for as long as it is being used.
+ * layer carries at that position:
+ *
+ *   bound (anything but &trans / &none)  ->  mine; refresh the timeout, layer persists
+ *   transparent / none                   ->  not mine; drop the layer immediately
  */
 
 #define DT_DRV_COMPAT zmk_input_processor_auto_layer
@@ -113,10 +114,20 @@ static int handle_position_state_changed(const struct device *dev, const zmk_eve
         return ZMK_EV_EVENT_BUBBLE;
     }
 
-    if (data->is_active && position_is_bound_on_layer(data->layer, ev->position)) {
-        /* Still mousing -- push the deadline out so a click does not cost the layer. */
-        k_work_reschedule(&disable_works[data->layer], K_MSEC(data->timeout_ms));
-        LOG_DBG("Position %d is bound on layer %d, extending", ev->position, data->layer);
+    if (data->is_active) {
+        if (position_is_bound_on_layer(data->layer, ev->position)) {
+            /* Still mousing -- push the deadline out so a click does not cost the layer. */
+            k_work_reschedule(&disable_works[data->layer], K_MSEC(data->timeout_ms));
+            LOG_DBG("Position %d bound on layer %d, extending", ev->position, data->layer);
+        } else {
+            /* Back to typing. Dropping now rather than waiting out the timeout is what
+             * keeps the layer from stealing the next few keystrokes. Safe to do before
+             * the keymap resolves this press: the layer is transparent here by
+             * definition, so it would have fallen through to the base layer anyway. */
+            set_active(data, false);
+            k_work_cancel_delayable(&disable_works[data->layer]);
+            LOG_DBG("Position %d not bound on layer %d, dropping", ev->position, data->layer);
+        }
     }
 
     k_mutex_unlock(&data->lock);

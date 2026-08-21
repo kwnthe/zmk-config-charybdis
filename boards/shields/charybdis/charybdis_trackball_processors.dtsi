@@ -23,9 +23,10 @@
      * against an excluded-positions list that had to be edited by hand, and rebuilt,
      * every time a binding moved. See src/input_processor_auto_layer.c.
      *
-     * Consequence worth knowing: a bound key now REFRESHES the timeout instead of
-     * being merely tolerated, so clicking keeps the layer alive as long as you keep
-     * clicking. Transparent keys are ignored entirely and the layer expires on time.
+     * A bound key REFRESHES the timeout rather than merely being tolerated, so
+     * clicking keeps the layer alive as long as you keep clicking. A transparent key
+     * drops it at once -- that is the signal you have gone back to typing, and waiting
+     * out the timeout would let the layer steal the next keystrokes.
      */
     zip_auto_layer: zip_auto_layer {
         compatible = "zmk,input-processor-auto-layer";
@@ -49,7 +50,7 @@
 // (input_processor_scaler.c accumulates the remainder) while multiplying is not.
 // Scroll is left alone: how fast a page scrolls is its own preference, unrelated to
 // pointer speed. If you change cpi, rescale all three or the feel shifts everywhere.
-// &zip_auto_layer AUTO_MOUSE 500 is repeated in all three chains on purpose.
+// &zip_auto_layer AUTO_MOUSE 350 is repeated in all three chains on purpose.
 // input_listener.c walks these children in declaration order and stops at the first
 // whose layer_mask is active (`if (!override->process_next) return 0;`). So while
 // SNIPING or SCROLL is held, the `move` chain never runs -- without the processor in
@@ -59,16 +60,16 @@
 #define CHARYBDIS_TRACKBALL_PROCESSORS \
     snipe { \
         layers = <SNIPING>; \
-        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 6>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 350>, <&zip_xy_scaler 1 6>; \
     }; \
     \
     scroll { \
         layers = <SCROLL>; \
-        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 350>, <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
     }; \
     \
     move { \
         layers = <BASE POINTER>; \
-        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 4>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 350>, <&zip_xy_scaler 3 4>; \
     };
 
