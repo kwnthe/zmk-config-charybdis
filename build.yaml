@@ -25,6 +25,13 @@ include:
   snippet: zmk-usb-logging
   artifact-name: DEBUG-usb-logging-charybdis_right_standalone
 
+# Dongle mode puts the trackball on a peripheral, so this is the only build that can
+# show the sensor-side logging: "Trackball CPI now <n>" from behavior_trackball_cpi.c.
+- board: nice_nano//zmk
+  shield: dongle_charybdis_right
+  snippet: zmk-usb-logging
+  artifact-name: DEBUG-usb-logging-dongle_charybdis_right
+
 # Dongle mode - prospector dongle is primary/central with display, right is peripheral
 - board: nice_nano//zmk
   shield: dongle_charybdis_right

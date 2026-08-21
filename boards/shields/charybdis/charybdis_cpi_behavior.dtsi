@@ -17,6 +17,9 @@
             compatible = "zmk,behavior-trackball-cpi";
             #binding-cells = <1>;
 
+            /* Without this, editors render the node name truncated ("or_trackb"). */
+            display-name = "CPI";
+
             /* Keep cpi-default in step with `cpi` on the trackball node. */
             cpi-min = <200>;
             cpi-max = <3200>;
