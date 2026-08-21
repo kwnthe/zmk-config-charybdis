@@ -1,0 +1,30 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Raises a layer on pointer motion and holds it there while you keep using it.
+
+  Like zmk,input-processor-temp-layer, but decides what a key press means by reading
+  the binding the target layer actually carries at that position, instead of matching
+  the position against a hand-maintained list:
+
+    bound (anything but &trans / &none)  ->  refresh the timeout, the layer persists
+    transparent / none                   ->  ignored, the layer keeps expiring
+
+  Nothing to keep in step, so bindings added later from a keymap editor work without
+  a firmware rebuild.
+
+  param1 = layer index, param2 = idle timeout in ms.
+
+compatible: "zmk,input-processor-auto-layer"
+
+include: ip_two_param.yaml
+
+properties:
+  require-prior-idle-ms:
+    type: int
+    required: false
+    default: 0
+    description: |
+      Suppress activation for this long after any keystroke, so brushing the ball
+      mid-typing cannot raise the layer.

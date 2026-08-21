@@ -14,25 +14,27 @@
 #include <dt-bindings/zmk/input_transform.h>
 #include <input/processors.dtsi>
 
-// Single global instance (the driver uses DEVICE_DT_INST_GET(0)), so these apply to
-// every &zip_temp_layer reference below.
-&zip_temp_layer {
-    // Brushing the ball mid-typing must NOT raise the mouse layer. The thumb rests
-    // right next to it on a Charybdis, so this is the property that makes the whole
-    // thing usable: should_quick_tap() suppresses activation for this long after any
-    // keystroke.
-    require-prior-idle-ms = <300>;
+// Single global instance, so these settings apply to every reference below.
+/ {
+    /*
+     * Replaces upstream's &zip_temp_layer. Same job, but it works out which presses
+     * belong to AUTO_MOUSE by reading the binding the layer actually carries at that
+     * position -- &trans / &none mean "not mine" -- instead of matching the position
+     * against an excluded-positions list that had to be edited by hand, and rebuilt,
+     * every time a binding moved. See src/input_processor_auto_layer.c.
+     *
+     * Consequence worth knowing: a bound key now REFRESHES the timeout instead of
+     * being merely tolerated, so clicking keeps the layer alive as long as you keep
+     * clicking. Transparent keys are ignored entirely and the layer expires on time.
+     */
+    zip_auto_layer: zip_auto_layer {
+        compatible = "zmk,input-processor-auto-layer";
+        #input-processor-cells = <2>;
 
-    // Counter-intuitive semantics, straight from input_processor_temp_layer.c: with an
-    // EMPTY list nothing ever deactivates the layer early, it only times out. Once the
-    // list is non-empty, any position NOT in it deactivates immediately. So this is the
-    // set of keys usable without dropping the layer -- i.e. exactly what AUTO_MOUSE binds.
-    // Keep this in step with every non-transparent binding on AUTO_MOUSE, including
-    // ones added later from a keymap editor: a position bound on that layer but missing
-    // here is dead on arrival, because the layer drops before the binding resolves.
-    //   15 F=snipe  16 P=MB4  17 B=MB5  25 A=scroll  26 R=scroll  27 S=RCLK
-    //   28 T=LCLK   29 G=MCLK 39 C=scroll 41 V=scroll 44 ,=LCLK   45 .=RCLK
-    excluded-positions = <15 16 17 25 26 27 28 29 39 41 44 45>;
+        /* Brushing the ball mid-typing must not raise the layer: the thumb rests right
+         * next to it on a Charybdis, and this is what makes the whole thing usable. */
+        require-prior-idle-ms = <300>;
+    };
 };
 
 // Standard trackball processing configuration
@@ -47,7 +49,7 @@
 // (input_processor_scaler.c accumulates the remainder) while multiplying is not.
 // Scroll is left alone: how fast a page scrolls is its own preference, unrelated to
 // pointer speed. If you change cpi, rescale all three or the feel shifts everywhere.
-// &zip_temp_layer AUTO_MOUSE 500 is repeated in all three chains on purpose.
+// &zip_auto_layer AUTO_MOUSE 500 is repeated in all three chains on purpose.
 // input_listener.c walks these children in declaration order and stops at the first
 // whose layer_mask is active (`if (!override->process_next) return 0;`). So while
 // SNIPING or SCROLL is held, the `move` chain never runs -- without the processor in
@@ -57,16 +59,16 @@
 #define CHARYBDIS_TRACKBALL_PROCESSORS \
     snipe { \
         layers = <SNIPING>; \
-        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 6>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_scaler 1 6>; \
     }; \
     \
     scroll { \
         layers = <SCROLL>; \
-        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>, <&zip_xy_scaler 1 160>, <&zip_xy_to_scroll_mapper>; \
     }; \
     \
     move { \
         layers = <BASE POINTER>; \
-        input-processors = <&zip_temp_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 4>; \
+        input-processors = <&zip_auto_layer AUTO_MOUSE 500>, <&zip_xy_scaler 3 4>; \
     };
 

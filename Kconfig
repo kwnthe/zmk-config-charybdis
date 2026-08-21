@@ -23,3 +23,12 @@ config ZMK_BEHAVIOR_TRACKBALL_CPI_INIT_PRIORITY
       exist in the left-half and dongle builds, which instantiate this behavior
       without a sensor. Hence a plain number, chosen to land well after any input
       device while staying inside POST_KERNEL.
+
+config ZMK_INPUT_PROCESSOR_AUTO_LAYER
+    bool "Self-maintaining auto-mouse layer processor"
+    default y
+    depends on DT_HAS_ZMK_INPUT_PROCESSOR_AUTO_LAYER_ENABLED
+    help
+      Builds &zip_auto_layer, the replacement for upstream's zip_temp_layer that reads
+      the keymap to decide which presses belong to the layer rather than matching them
+      against an excluded-positions list.
