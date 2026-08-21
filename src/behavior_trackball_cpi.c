@@ -68,6 +68,7 @@ static void apply_cpi(const struct device *dev, uint16_t cpi) {
     struct behavior_tb_cpi_data *data = dev->data;
 
     if (cfg->sensor == NULL) {
+        /* Normal on every half but the one with the sensor -- see locality below. */
         LOG_DBG("No trackball on this half, ignoring CPI change");
         return;
     }
@@ -149,6 +150,14 @@ static int behavior_tb_cpi_init(const struct device *dev) {
 static const struct behavior_driver_api behavior_tb_cpi_driver_api = {
     .binding_pressed = on_keymap_binding_pressed,
     .binding_released = on_keymap_binding_released,
+    /*
+     * GLOBAL, not the default CENTRAL. The sensor hangs off whichever half physically
+     * carries it, which in dongle mode is a peripheral -- so running only on the central
+     * meant the dongle handled every press against a NULL sensor and no-oped. GLOBAL
+     * dispatches to the central and every peripheral; the halves without a `device`
+     * still no-op, and the one holding the trackball applies it.
+     */
+    .locality = BEHAVIOR_LOCALITY_GLOBAL,
 };
 
 #define TB_CPI_SENSOR(n)                                                                           \
