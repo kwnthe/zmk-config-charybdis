@@ -1,8 +1,13 @@
-// 1.5x the stock pointer-key speed. pointing.h guards this with #ifndef, so defining
-// it before the include wins, and MOVE_UP/DOWN/LEFT/RIGHT all scale together instead of
-// four hand-edited MOVE_X()/MOVE_Y() calls drifting apart. Note the mmv node also ramps
-// over time-to-max-speed-ms = 300, so this raises the ceiling, not the initial nudge.
-#define ZMK_POINTING_DEFAULT_MOVE_VAL 900
+// Pointer-key speed. pointing.h guards this with #ifndef, so defining it before the
+// include wins, and MOVE_UP/DOWN/LEFT/RIGHT all scale together instead of four
+// hand-edited MOVE_X()/MOVE_Y() calls drifting apart.
+//
+// 600 stock -> 900 -> 2250, the last being 2.5x on top of the 900. With macOS
+// acceleration off a count maps to a point, so 2250 crosses a 2560-point screen in
+// about a second. This is the ceiling, not the initial nudge: the mmv node ramps over
+// time-to-max-speed-ms = 300 with a linear exponent, so raising it makes a brief tap
+// coarser too, not just a held key faster.
+#define ZMK_POINTING_DEFAULT_MOVE_VAL 2250
 
 #include <dt-bindings/zmk/mouse.h>
 #include <behaviors/mouse_keys.dtsi>
