@@ -13,7 +13,17 @@
 
 / {
     behaviors {
-        tb_cpi: behavior_trackball_cpi {
+        /*
+         * Node name must stay under 9 characters. When the central dispatches a
+         * behavior to a peripheral it sends the DEVICE NAME, and the payload field is
+         * char behavior_dev[ZMK_SPLIT_RUN_BEHAVIOR_DEV_LEN] with DEV_LEN = 9 --
+         * anything longer is truncated and the peripheral finds nothing, silently.
+         * This node was `behavior_trackball_cpi`, arrived as "behavior", and did
+         * nothing at all in dongle mode, where the trackball is on a peripheral.
+         * ZMK's own reset behaviors are named `sysreset` and `bootload` for exactly
+         * this reason. The label below is unconstrained; only the node name matters.
+         */
+        tb_cpi: tbcpi {
             compatible = "zmk,behavior-trackball-cpi";
             #binding-cells = <1>;
 
