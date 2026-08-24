@@ -5,9 +5,10 @@
 # its own behaviors. Guarded so builds without the behavior node never declare an
 # empty library.
 
-if(CONFIG_ZMK_BEHAVIOR_TRACKBALL_CPI OR CONFIG_ZMK_INPUT_PROCESSOR_AUTO_LAYER)
+if(CONFIG_ZMK_BEHAVIOR_TRACKBALL_CPI OR CONFIG_ZMK_INPUT_PROCESSOR_AUTO_LAYER OR CONFIG_ZMK_BEHAVIOR_BATTERY_REPORT)
   zephyr_library_named(charybdis_behaviors)
   zephyr_library_sources_ifdef(CONFIG_ZMK_BEHAVIOR_TRACKBALL_CPI src/behavior_trackball_cpi.c)
   zephyr_library_sources_ifdef(CONFIG_ZMK_INPUT_PROCESSOR_AUTO_LAYER src/input_processor_auto_layer.c)
+  zephyr_library_sources_ifdef(CONFIG_ZMK_BEHAVIOR_BATTERY_REPORT src/behavior_battery_report.c)
   zephyr_include_directories(include)
 endif()

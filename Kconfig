@@ -32,3 +32,12 @@ config ZMK_INPUT_PROCESSOR_AUTO_LAYER
       Builds &zip_auto_layer, the replacement for upstream's zip_temp_layer that reads
       the keymap to decide which presses belong to the layer rather than matching them
       against an excluded-positions list.
+
+config ZMK_BEHAVIOR_BATTERY_REPORT
+    bool "Type the split halves' battery percentages"
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_BATTERY_REPORT_ENABLED
+    help
+      Builds &batt_rpt. Only useful on the central, which is where the peripheral
+      battery levels are cached and where HID output happens, but it instantiates
+      everywhere so one keymap builds for every shield.

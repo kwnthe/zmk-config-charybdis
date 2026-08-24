@@ -36,5 +36,16 @@
             cpi-step = <200>;
             cpi-default = <1600>;
         };
+
+        /*
+         * No node-name limit here: default CENTRAL locality means this never crosses
+         * the split, so it is not squeezed into ZMK_SPLIT_RUN_BEHAVIOR_DEV_LEN.
+         */
+        batt_rpt: batt_rpt {
+            compatible = "zmk,behavior-battery-report";
+            #binding-cells = <0>;
+            display-name = "Battery";
+            tap-ms = <12>;
+        };
     };
 };

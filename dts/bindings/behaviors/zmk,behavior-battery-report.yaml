@@ -1,0 +1,27 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Types the split halves' battery percentages as text, e.g. "B0 78 B1 64".
+
+  For a dongle wired to the host over USB there is no other way to see them: ZMK
+  reports battery only through the BLE GATT Battery Service, and USB HID has no
+  battery channel at all. The central does know the levels -- it collects them when
+  CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING is set -- so this reads that
+  cache and spells it out on the keyboard itself.
+
+  The number after B is the peripheral slot, assigned in connection order and stable
+  once both halves are bonded. Learn which is which once.
+
+compatible: "zmk,behavior-battery-report"
+
+include: zero_param.yaml
+
+properties:
+  tap-ms:
+    type: int
+    default: 12
+    description: |
+      Milliseconds between key events while typing. Each character costs two of these,
+      one for press and one for release. Too low and the HID reports coalesce and
+      characters go missing; too high and the report takes a visible moment to appear.
