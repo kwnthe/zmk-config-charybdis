@@ -9,10 +9,10 @@
 // coarser too, not just a held key faster.
 #define ZMK_POINTING_DEFAULT_MOVE_VAL 2250
 
-// Key-driven scroll speed, feeding SCRL_UP / SCRL_DOWN. 10 stock -> 40 -> 30 -> 22,
-// settled by feel. Separate knob from the trackball's scroll, which is set by the
+// Key-driven scroll speed, feeding SCRL_UP / SCRL_DOWN. 10 stock, tried 40/30/22,
+// settled at 15 by feel. Separate knob from the trackball's scroll, which is set by the
 // divisor in charybdis_trackball_processors.dtsi and is unaffected by this.
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 22
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 15
 
 #include <dt-bindings/zmk/mouse.h>
 #include <behaviors/mouse_keys.dtsi>
