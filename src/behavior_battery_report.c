@@ -31,6 +31,19 @@ LOG_MODULE_REGISTER(charybdis_batt, CONFIG_ZMK_LOG_LEVEL);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(DT_DRV_COMPAT)
 
+/*
+ * Peripherals do not link the keycode event -- they forward positions and never build
+ * HID reports -- so raise_zmk_keycode_state_changed is simply absent there and merely
+ * referencing it fails the link. Everything that types is gated on being able to.
+ */
+#define BATT_CAN_REPORT (!IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
+
+struct battery_report_config {
+    uint16_t tap_ms;
+};
+
+#if BATT_CAN_REPORT
+
 #if defined(CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS)
 #define PERIPHERAL_SLOTS CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS
 #else
@@ -48,10 +61,6 @@ LOG_MODULE_REGISTER(charybdis_batt, CONFIG_ZMK_LOG_LEVEL);
 
 /* Long enough for "B0 100 B1 100" plus slack. */
 #define MAX_CHARS 40
-
-struct battery_report_config {
-    uint16_t tap_ms;
-};
 
 /* One instance drives one output stream, so this state is file-scope: the typing work
  * item cannot carry a device pointer without a lookup, and a second instance would be
@@ -146,11 +155,6 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
     return ZMK_BEHAVIOR_OPAQUE;
 }
 
-static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
-                                     struct zmk_behavior_binding_event event) {
-    return ZMK_BEHAVIOR_OPAQUE;
-}
-
 static int battery_report_init(const struct device *dev) {
     const struct battery_report_config *cfg = dev->config;
 
@@ -161,6 +165,24 @@ static int battery_report_init(const struct device *dev) {
     k_work_init_delayable(&type_work, type_work_cb);
 
     return 0;
+}
+
+#else /* !BATT_CAN_REPORT */
+
+/* Still instantiated so the one shared keymap keeps building for every shield; there is
+ * just nothing here to report, and no way to say it. */
+static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
+                                    struct zmk_behavior_binding_event event) {
+    return ZMK_BEHAVIOR_OPAQUE;
+}
+
+static int battery_report_init(const struct device *dev) { return 0; }
+
+#endif /* BATT_CAN_REPORT */
+
+static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
+                                     struct zmk_behavior_binding_event event) {
+    return ZMK_BEHAVIOR_OPAQUE;
 }
 
 static const struct behavior_driver_api battery_report_driver_api = {
