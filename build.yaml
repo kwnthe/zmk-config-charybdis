@@ -5,10 +5,16 @@ include:
   shield: charybdis_left
 
 # Standalone mode - right keyboard is primary/central
+# BT_CTLR_PHY_2M and the 7.5ms interval request go here rather than in a .conf,
+# because boards/shields/charybdis/dongle_charybdis_right.conf is a SYMLINK to
+# charybdis_right_standalone.conf -- anything written there lands in the dongle-mode
+# build too. Only standalone drives two BLE links off one radio and wants this trade;
+# the dongle link is stable and ZMK turns PHY_2M off under ZMK_BLE_EXPERIMENTAL_CONN
+# on purpose. cmake-args is per-entry, so it cannot leak.
 - board: nice_nano//zmk
   shield: charybdis_right_standalone
   snippet: studio-rpc-usb-uart
-  cmake-args: -DCONFIG_ZMK_STUDIO=y
+  cmake-args: -DCONFIG_ZMK_STUDIO=y -DCONFIG_BT_CTLR_PHY_2M=y -DCONFIG_BT_PERIPHERAL_PREF_MAX_INT=6
 
 # Kept deliberately: USB-logging variants of both halves. Flash one instead of the
 # normal firmware, open the CDC-ACM serial port and watch the log -- "Sending event at
