@@ -18,3 +18,13 @@
         CHARYBDIS_TRACKBALL_PROCESSORS
     };
 };
+
+/*
+ * 250Hz sampling instead of 125Hz -- roughly 4ms off the worst-case age of a report.
+ * Applied only in standalone, where the radio is contended and the latency is worth
+ * the extra power. charybdis_right_common.dtsi is shared with dongle_charybdis_right,
+ * so putting it there would have changed the dongle build too.
+ */
+&trackball {
+    force-awake-4ms-mode;
+};
