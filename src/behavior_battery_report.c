@@ -25,24 +25,12 @@
 #include <zmk/behavior.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
-#include <zmk/events/keycode_state_changed.h>
+
+#include <charybdis/typer.h>
 
 LOG_MODULE_REGISTER(charybdis_batt, CONFIG_ZMK_LOG_LEVEL);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(DT_DRV_COMPAT)
-
-/*
- * Peripherals do not link the keycode event -- they forward positions and never build
- * HID reports -- so raise_zmk_keycode_state_changed is simply absent there and merely
- * referencing it fails the link. Everything that types is gated on being able to.
- */
-#define BATT_CAN_REPORT (!IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
-
-struct battery_report_config {
-    uint16_t tap_ms;
-};
-
-#if BATT_CAN_REPORT
 
 #if defined(CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS)
 #define PERIPHERAL_SLOTS CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS
@@ -50,135 +38,51 @@ struct battery_report_config {
 #define PERIPHERAL_SLOTS 2
 #endif
 
-/* HID keyboard usage page, and the usage ids for the characters we emit. Spelled out
- * rather than pulled from dt-bindings/zmk/keys.h, whose single-letter macros (A, B, ...)
- * would collide with ordinary identifiers in C. */
-#define ENC(usage) (((uint32_t)0x07 << 16) | (usage))
-#define USAGE_1 0x1E
-#define USAGE_0 0x27
-#define USAGE_A 0x04
-#define USAGE_SPACE 0x2C
+/* 0xFF means that slot has never reported. */
+#define SOC_UNKNOWN 0xFF
 
-/* Long enough for "B0 100 B1 100" plus slack. */
-#define MAX_CHARS 40
+struct battery_report_config {
+    uint16_t tap_ms;
+};
 
-/* One instance drives one output stream, so this state is file-scope: the typing work
- * item cannot carry a device pointer without a lookup, and a second instance would be
- * meaningless anyway. */
-static uint32_t queue[MAX_CHARS];
-static uint8_t queue_len;
-static uint8_t queue_idx;
-static bool key_is_down;
-static uint16_t queue_tap_ms = 12;
-static struct k_work_delayable type_work;
-
-/* Slot -> percent, 0xFF meaning "never reported". */
-static uint8_t peripheral_soc[PERIPHERAL_SLOTS];
-
-static uint32_t enc_digit(uint8_t d) { return ENC(d == 0 ? USAGE_0 : USAGE_1 + d - 1); }
-
-static uint32_t enc_letter(char c) { return ENC(USAGE_A + (c - 'A')); }
-
-static void push(uint32_t encoded) {
-    if (queue_len < MAX_CHARS) {
-        queue[queue_len++] = encoded;
-    }
-}
-
-static void push_number(uint8_t n) {
-    if (n >= 100) {
-        push(enc_digit(n / 100));
-    }
-    if (n >= 10) {
-        push(enc_digit((n / 10) % 10));
-    }
-    push(enc_digit(n % 10));
-}
-
-/* Two work passes per character: press, then release. Doing both in one pass would put
- * a press and a release in the same HID report, and the host would see nothing. */
-static void type_work_cb(struct k_work *work) {
-    if (queue_idx >= queue_len) {
-        queue_len = 0;
-        queue_idx = 0;
-        return;
-    }
-
-    const int64_t now = k_uptime_get();
-
-    raise_zmk_keycode_state_changed_from_encoded(queue[queue_idx], !key_is_down, now);
-
-    if (key_is_down) {
-        key_is_down = false;
-        queue_idx++;
-    } else {
-        key_is_down = true;
-    }
-
-    k_work_reschedule(&type_work, K_MSEC(queue_tap_ms));
-}
+static uint8_t peripheral_soc[PERIPHERAL_SLOTS] = {[0 ...(PERIPHERAL_SLOTS - 1)] = SOC_UNKNOWN};
 
 static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                     struct zmk_behavior_binding_event event) {
-    /* Still spelling out the previous report -- ignore rather than interleave. */
-    if (queue_len > 0) {
+    const struct device *dev = zmk_behavior_get_binding(binding->behavior_dev);
+    if (dev == NULL || charybdis_typer_busy()) {
         return ZMK_BEHAVIOR_OPAQUE;
     }
 
-    queue_idx = 0;
-    key_is_down = false;
+    const struct battery_report_config *cfg = dev->config;
+
+    charybdis_typer_begin();
 
     bool any = false;
     for (uint8_t i = 0; i < PERIPHERAL_SLOTS; i++) {
-        if (peripheral_soc[i] == 0xFF) {
+        if (peripheral_soc[i] == SOC_UNKNOWN) {
             continue;
         }
         if (any) {
-            push(ENC(USAGE_SPACE));
+            charybdis_typer_str(" ");
         }
-        push(enc_letter('B'));
-        push(enc_digit(i));
-        push(ENC(USAGE_SPACE));
-        push_number(peripheral_soc[i]);
+        charybdis_typer_str("B");
+        charybdis_typer_num(i);
+        charybdis_typer_str(" ");
+        charybdis_typer_num(peripheral_soc[i]);
         any = true;
     }
 
     if (!any) {
-        /* Nothing reported yet: say so rather than type an empty line. */
-        push(enc_letter('N'));
-        push(enc_letter('A'));
+        /* Levels arrive on a report interval, not at boot, so early presses find
+         * nothing. Say so rather than type an empty line. */
+        charybdis_typer_str("NA");
     }
 
-    LOG_DBG("Typing battery report, %d chars", queue_len);
-    k_work_reschedule(&type_work, K_NO_WAIT);
+    charybdis_typer_send(cfg->tap_ms);
 
     return ZMK_BEHAVIOR_OPAQUE;
 }
-
-static int battery_report_init(const struct device *dev) {
-    const struct battery_report_config *cfg = dev->config;
-
-    queue_tap_ms = cfg->tap_ms;
-    for (uint8_t i = 0; i < PERIPHERAL_SLOTS; i++) {
-        peripheral_soc[i] = 0xFF;
-    }
-    k_work_init_delayable(&type_work, type_work_cb);
-
-    return 0;
-}
-
-#else /* !BATT_CAN_REPORT */
-
-/* Still instantiated so the one shared keymap keeps building for every shield; there is
- * just nothing here to report, and no way to say it. */
-static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
-                                    struct zmk_behavior_binding_event event) {
-    return ZMK_BEHAVIOR_OPAQUE;
-}
-
-static int battery_report_init(const struct device *dev) { return 0; }
-
-#endif /* BATT_CAN_REPORT */
 
 static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
@@ -193,8 +97,8 @@ static const struct behavior_driver_api battery_report_driver_api = {
 #endif
 };
 
-/* The peripheral battery event only ever fires on a central, and on other roles the
- * behavior simply has nothing to report. */
+/* The peripheral battery event only ever fires on a central; elsewhere the behavior
+ * simply has nothing to report. */
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 
 static int battery_report_listener(const zmk_event_t *eh) {
@@ -218,9 +122,8 @@ ZMK_SUBSCRIPTION(charybdis_battery_report, zmk_peripheral_battery_state_changed)
     static const struct battery_report_config battery_report_config_##n = {                        \
         .tap_ms = DT_INST_PROP(n, tap_ms),                                                          \
     };                                                                                             \
-    BEHAVIOR_DT_INST_DEFINE(n, battery_report_init, NULL, NULL, &battery_report_config_##n,         \
-                            POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                       \
-                            &battery_report_driver_api);
+    BEHAVIOR_DT_INST_DEFINE(n, NULL, NULL, NULL, &battery_report_config_##n, POST_KERNEL,           \
+                            CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &battery_report_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(BATT_REPORT_INST)
 

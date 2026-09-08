@@ -47,5 +47,22 @@
             display-name = "Battery";
             tap-ms = <12>;
         };
+
+        /*
+         * baseline-* seed the counters only when NVS is empty, i.e. after a
+         * settings_reset. Read the totals out before wiping, paste them here, and
+         * counting continues from that point.
+         */
+        stats_rpt: stats_rpt {
+            compatible = "zmk,behavior-typing-stats";
+            #binding-cells = <0>;
+            display-name = "Stats";
+            tap-ms = <12>;
+
+            baseline-keys = <0>;
+            baseline-words = <0>;
+            baseline-bksp = <0>;
+            baseline-active-sec = <0>;
+        };
     };
 };

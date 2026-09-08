@@ -41,3 +41,12 @@ config ZMK_BEHAVIOR_BATTERY_REPORT
       Builds &batt_rpt. Only useful on the central, which is where the peripheral
       battery levels are cached and where HID output happens, but it instantiates
       everywhere so one keymap builds for every shield.
+
+config ZMK_BEHAVIOR_TYPING_STATS
+    bool "Keystroke counters, typed on request"
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_TYPING_STATS_ENABLED
+    select SETTINGS
+    help
+      Builds &stats_rpt. Counts on the central and persists to NVS; see the binding
+      docs for what the numbers mean and how baseline-* survives a settings_reset.

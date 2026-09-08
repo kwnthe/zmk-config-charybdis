@@ -1,0 +1,52 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Counts keystrokes and types the totals on press, e.g. "124503 keys 21034 words 62 wpm
+  8912 bksp".
+
+  Counts keycodes, not text. "Words" means a space, enter or tab arriving after at least
+  one letter -- close enough for prose, misleading for code, and WASD in a game counts
+  as letters. Backspaces are counted separately and never subtracted, so the totals stay
+  honest about what was pressed rather than guessing at what survived.
+
+  WPM is gross: five keystrokes to a word, divided by active time only. Gaps longer than
+  three seconds are treated as pauses and excluded, or a night of idling would flatten
+  the average.
+
+  Totals live in NVS and survive reboots and firmware flashes. settings_reset erases
+  them -- that partition is what settings_reset exists to wipe, and the nice!nano flash
+  map has no spare region. The baseline-* properties are the answer: read the totals out
+  before a reset, paste them in here, and counting resumes from there. They apply only
+  when NVS comes up empty, so an ordinary flash never double-counts.
+
+compatible: "zmk,behavior-typing-stats"
+
+include: zero_param.yaml
+
+properties:
+  tap-ms:
+    type: int
+    default: 12
+    description: Milliseconds between key events while typing the report.
+
+  baseline-keys:
+    type: int
+    default: 0
+    description: Starting total, used only when NVS holds nothing.
+
+  baseline-words:
+    type: int
+    default: 0
+
+  baseline-bksp:
+    type: int
+    default: 0
+
+  baseline-active-sec:
+    type: int
+    default: 0
+    description: |
+      Starting active time in seconds. Seconds rather than milliseconds because a
+      devicetree cell is 32 bits, and milliseconds would overflow after about 50 days
+      of typing.
