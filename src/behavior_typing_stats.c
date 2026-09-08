@@ -70,6 +70,13 @@ struct stats_config {
     struct stats baseline;
 };
 
+/*
+ * The keycode event lives only where HID is produced -- a peripheral forwards key
+ * positions and never links it, so even referencing as_zmk_keycode_state_changed there
+ * fails the link. Same predicate as the typer: if it cannot type, it cannot count.
+ */
+#if CHARYBDIS_TYPER_CAN_TYPE
+
 static struct stats totals;
 static int64_t last_press_ms;
 static bool word_pending;
@@ -201,11 +208,6 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
     return ZMK_BEHAVIOR_OPAQUE;
 }
 
-static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
-                                     struct zmk_behavior_binding_event event) {
-    return ZMK_BEHAVIOR_OPAQUE;
-}
-
 static int stats_init(const struct device *dev) {
     const struct stats_config *cfg = dev->config;
 
@@ -218,6 +220,23 @@ static int stats_init(const struct device *dev) {
     }
 
     return 0;
+}
+
+#else /* !CHARYBDIS_TYPER_CAN_TYPE */
+
+/* Instantiated anyway so the one shared keymap keeps building for every shield. */
+static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
+                                    struct zmk_behavior_binding_event event) {
+    return ZMK_BEHAVIOR_OPAQUE;
+}
+
+static int stats_init(const struct device *dev) { return 0; }
+
+#endif /* CHARYBDIS_TYPER_CAN_TYPE */
+
+static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
+                                     struct zmk_behavior_binding_event event) {
+    return ZMK_BEHAVIOR_OPAQUE;
 }
 
 static const struct behavior_driver_api stats_driver_api = {
