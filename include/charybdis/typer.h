@@ -25,6 +25,17 @@
 /* True while a report is still being spelled out. */
 bool charybdis_typer_busy(void);
 
+/*
+ * True only for the duration of a keycode event this module raised. Anything counting
+ * keystrokes must skip those, or reports inflate the numbers they are reporting -- a
+ * stats line is ~35 characters, so reading the counter used to add 35 to it.
+ *
+ * Narrower than busy() on purpose: busy() spans the whole report, and real keys pressed
+ * during it should still count. ZMK dispatches events synchronously, so a flag set
+ * around the raise call is exactly the emitted event and nothing else.
+ */
+bool charybdis_typer_is_emitting(void);
+
 /* Discard anything pending and start a fresh report. */
 void charybdis_typer_begin(void);
 

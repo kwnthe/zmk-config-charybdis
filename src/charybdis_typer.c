@@ -32,6 +32,7 @@ static uint32_t queue[MAX_CHARS];
 static uint8_t queue_len;
 static uint8_t queue_idx;
 static bool key_is_down;
+static bool emitting;
 static uint16_t tap_ms = 12;
 
 static void type_work_cb(struct k_work *work);
@@ -46,7 +47,9 @@ static void type_work_cb(struct k_work *work) {
         return;
     }
 
+    emitting = true;
     raise_zmk_keycode_state_changed_from_encoded(queue[queue_idx], !key_is_down, k_uptime_get());
+    emitting = false;
 
     if (key_is_down) {
         key_is_down = false;
@@ -65,6 +68,8 @@ static void push(uint32_t encoded) {
 }
 
 bool charybdis_typer_busy(void) { return queue_len > 0; }
+
+bool charybdis_typer_is_emitting(void) { return emitting; }
 
 void charybdis_typer_begin(void) {
     queue_len = 0;
@@ -121,6 +126,7 @@ void charybdis_typer_send(uint16_t ms) {
 #else /* !CHARYBDIS_TYPER_CAN_TYPE */
 
 bool charybdis_typer_busy(void) { return false; }
+bool charybdis_typer_is_emitting(void) { return false; }
 void charybdis_typer_begin(void) {}
 void charybdis_typer_str(const char *s) { ARG_UNUSED(s); }
 void charybdis_typer_num(uint32_t n) { ARG_UNUSED(n); }

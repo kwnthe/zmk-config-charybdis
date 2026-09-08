@@ -149,7 +149,10 @@ static void count(uint16_t page, uint32_t id, int64_t now) {
 static int stats_listener(const zmk_event_t *eh) {
     const struct zmk_keycode_state_changed *kc = as_zmk_keycode_state_changed(eh);
     if (kc != NULL) {
-        if (kc->state) {
+        /* Skip the characters our own reports type. The typer raises the same event the
+         * counter listens to, so without this a stats line adds its own ~35 characters
+         * to the total it just reported, and a battery line adds ~12. */
+        if (kc->state && !charybdis_typer_is_emitting()) {
             count(kc->usage_page, kc->keycode, kc->timestamp);
         }
         return ZMK_EV_EVENT_BUBBLE;
