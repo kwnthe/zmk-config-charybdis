@@ -103,6 +103,25 @@ static bool position_is_bound_on_layer(uint8_t layer, uint32_t position) {
            bound != DEVICE_DT_GET(DT_NODELABEL(none));
 }
 
+/* A layer the user asked for outranks one the ball raised. Without this, dropping the
+ * layer on the keypress is not enough: the next ball movement raises it straight back
+ * over the layer still being held, which is how mouse-move keys on Raise ended up
+ * firing clicks instead. */
+static bool other_layer_held(uint8_t our_layer) {
+    zmk_keymap_layer_id_t def = zmk_keymap_layer_default();
+
+    for (uint8_t i = 0; i < MAX_LAYERS; i++) {
+        if (i == def || i == our_layer) {
+            continue;
+        }
+        if (zmk_keymap_layer_active(i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static int handle_position_state_changed(const struct device *dev, const zmk_event_t *eh) {
     const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
     if (!ev->state) {
@@ -220,7 +239,7 @@ static int auto_layer_handle_event(const struct device *dev, struct input_event 
     /* Mid-typing brush of the ball must not raise the layer. */
     bool too_soon = (data->last_tapped + cfg->require_prior_idle_ms) > k_uptime_get();
 
-    if (!data->is_active && !too_soon) {
+    if (!data->is_active && !too_soon && !other_layer_held(param1)) {
         set_active(data, true);
     }
 
