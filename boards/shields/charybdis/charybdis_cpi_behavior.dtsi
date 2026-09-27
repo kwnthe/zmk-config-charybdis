@@ -64,5 +64,16 @@
             baseline-bksp = <0>;
             baseline-active-sec = <0>;
         };
+
+        /*
+         * Short node name is not required here -- CENTRAL locality means it never
+         * crosses the split -- but kept under 9 characters anyway, so moving it to a
+         * peripheral later cannot silently truncate it the way tbcpi did.
+         */
+        dngl_boot: dnglboot {
+            compatible = "zmk,behavior-central-bootloader";
+            #binding-cells = <0>;
+            display-name = "DongleBoot";
+        };
     };
 };

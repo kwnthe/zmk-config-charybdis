@@ -1,0 +1,16 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Reboots the central into its UF2 bootloader.
+
+  ZMK's &bootloader runs with BEHAVIOR_LOCALITY_EVENT_SOURCE, so it always targets the
+  half holding the key and can never reach a dongle -- the one board with no keys, and
+  so the one whose reset button you otherwise have to reach for.
+
+  Targets whichever board is central at the time: the dongle in dongle mode, the right
+  half in standalone. That is the board running the keymap, and the one being reflashed.
+
+compatible: "zmk,behavior-central-bootloader"
+
+include: zero_param.yaml

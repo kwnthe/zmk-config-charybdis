@@ -50,3 +50,12 @@ config ZMK_BEHAVIOR_TYPING_STATS
     help
       Builds &stats_rpt. Counts on the central and persists to NVS; see the binding
       docs for what the numbers mean and how baseline-* survives a settings_reset.
+
+config ZMK_BEHAVIOR_CENTRAL_BOOTLOADER
+    bool "Reboot the central into its bootloader"
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_CENTRAL_BOOTLOADER_ENABLED
+    help
+      Builds &dngl_boot. ZMK's &bootloader is EVENT_SOURCE-local and so can only ever
+      reach the half a key sits on; this one runs on the central, which with a dongle
+      is the only way to get at it without its reset button.
