@@ -63,6 +63,7 @@
             baseline-words = <0>;
             baseline-bksp = <0>;
             baseline-active-sec = <0>;
+            baseline-used-sec = <0>;
         };
 
         /*

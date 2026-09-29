@@ -50,3 +50,11 @@ properties:
       Starting active time in seconds. Seconds rather than milliseconds because a
       devicetree cell is 32 bits, and milliseconds would overflow after about 50 days
       of typing.
+
+  baseline-used-sec:
+    type: int
+    default: 0
+    description: |
+      Starting in-use time in seconds. Distinct from baseline-active-sec: that one is
+      time spent typing and feeds WPM, this one is time the keyboard was awake at all,
+      accumulated across ACTIVE stretches.

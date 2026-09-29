@@ -21,6 +21,8 @@
 #define DT_DRV_COMPAT zmk_behavior_typing_stats
 
 #include <zephyr/device.h>
+#include <string.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
@@ -58,11 +60,15 @@ LOG_MODULE_REGISTER(charybdis_stats, CONFIG_ZMK_LOG_LEVEL);
 
 #define SETTINGS_KEY "charybdis/stats"
 
+/* Append-only: the settings loader zero-fills anything a stored record is missing, so
+ * new fields at the end survive an upgrade. Reordering or inserting would silently
+ * reinterpret existing data. */
 struct stats {
     uint32_t keys;
     uint32_t words;
     uint32_t bksp;
-    uint64_t active_ms;
+    uint64_t active_ms; /* time spent typing, for WPM */
+    uint64_t used_ms;   /* time the keyboard was awake and in use */
 };
 
 struct stats_config {
@@ -79,6 +85,7 @@ struct stats_config {
 
 static struct stats totals;
 static int64_t last_press_ms;
+static int64_t active_since_ms;
 static bool word_pending;
 static uint32_t keys_since_save;
 static bool loaded_from_nvs;
@@ -96,11 +103,16 @@ static void save(void) {
 
 static int stats_settings_set(const char *name, size_t len, settings_read_cb read_cb,
                               void *cb_arg) {
-    if (settings_name_next(name, NULL) != 0 || len != sizeof(totals)) {
+    if (settings_name_next(name, NULL) != 0 || len > sizeof(totals)) {
         return -ENOENT;
     }
 
-    int ret = read_cb(cb_arg, &totals, sizeof(totals));
+    /* A record written before a field was appended is shorter. Zero-fill first so the
+     * new fields start at 0 rather than rejecting the whole thing and losing the
+     * history to a baseline of zero. */
+    memset(&totals, 0, sizeof(totals));
+
+    int ret = read_cb(cb_arg, &totals, len);
     if (ret <= 0) {
         return ret;
     }
@@ -159,10 +171,24 @@ static int stats_listener(const zmk_event_t *eh) {
     }
 
     const struct zmk_activity_state_changed *act = as_zmk_activity_state_changed(eh);
-    if (act != NULL && act->state != ZMK_ACTIVITY_ACTIVE && keys_since_save > 0) {
-        /* Going idle is the natural moment to persist: the work is already happening
-         * and nothing is being typed. */
-        save();
+    if (act != NULL) {
+        int64_t now = k_uptime_get();
+
+        if (act->state == ZMK_ACTIVITY_ACTIVE) {
+            active_since_ms = now;
+        } else if (active_since_ms > 0) {
+            /* Close the stretch. Doing this only at transitions means no timer and no
+             * wakeup of its own -- the cost is arithmetic on an event already handled.
+             * Loss on a sudden power cut is bounded by one idle period. */
+            totals.used_ms += (uint64_t)(now - active_since_ms);
+            active_since_ms = 0;
+        }
+
+        if (act->state != ZMK_ACTIVITY_ACTIVE && keys_since_save > 0) {
+            /* Going idle is the natural moment to persist: the work is already
+             * happening and nothing is being typed. */
+            save();
+        }
     }
 
     return ZMK_EV_EVENT_BUBBLE;
@@ -205,7 +231,19 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
     charybdis_typer_num(wpm());
     charybdis_typer_str(" wpm ");
     charybdis_typer_num(totals.bksp);
-    charybdis_typer_str(" bksp");
+    charybdis_typer_str(" bksp ");
+
+    /* Add the stretch still in progress -- the report is being typed during it, so
+     * leaving it out would always read short. Not folded into totals: that happens on
+     * the transition, and doing it here too would double-count. */
+    uint64_t used_ms = totals.used_ms;
+    if (active_since_ms > 0) {
+        used_ms += (uint64_t)(k_uptime_get() - active_since_ms);
+    }
+    charybdis_typer_num((uint32_t)(used_ms / 3600000ULL));
+    charybdis_typer_str("h ");
+    charybdis_typer_num((uint32_t)((used_ms / 60000ULL) % 60ULL));
+    charybdis_typer_str("m");
     charybdis_typer_send(cfg->tap_ms);
 
     return ZMK_BEHAVIOR_OPAQUE;
@@ -221,6 +259,10 @@ static int stats_init(const struct device *dev) {
         totals = cfg->baseline;
         LOG_DBG("No stored stats, seeding from baseline: %u keys", totals.keys);
     }
+
+    /* ZMK boots ACTIVE, and the first activity event will be the transition out of it,
+     * so the opening stretch has to start here or it goes uncounted. */
+    active_since_ms = k_uptime_get();
 
     return 0;
 }
@@ -258,7 +300,8 @@ static const struct behavior_driver_api stats_driver_api = {
                 .keys = DT_INST_PROP(n, baseline_keys),                                             \
                 .words = DT_INST_PROP(n, baseline_words),                                           \
                 .bksp = DT_INST_PROP(n, baseline_bksp),                                             \
-                .active_ms = (uint64_t)DT_INST_PROP(n, baseline_active_sec) * 1000ULL,              \
+                .active_ms = (uint64_t)DT_INST_PROP(n, baseline_active_sec) * 1000ULL,
+                .used_ms = (uint64_t)DT_INST_PROP(n, baseline_used_sec) * 1000ULL,              \
             },                                                                                     \
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, stats_init, NULL, NULL, &stats_config_##n, POST_KERNEL,              \
