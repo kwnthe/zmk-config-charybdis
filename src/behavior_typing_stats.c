@@ -300,7 +300,7 @@ static const struct behavior_driver_api stats_driver_api = {
                 .keys = DT_INST_PROP(n, baseline_keys),                                             \
                 .words = DT_INST_PROP(n, baseline_words),                                           \
                 .bksp = DT_INST_PROP(n, baseline_bksp),                                             \
-                .active_ms = (uint64_t)DT_INST_PROP(n, baseline_active_sec) * 1000ULL,
+                .active_ms = (uint64_t)DT_INST_PROP(n, baseline_active_sec) * 1000ULL,            \
                 .used_ms = (uint64_t)DT_INST_PROP(n, baseline_used_sec) * 1000ULL,              \
             },                                                                                     \
     };                                                                                             \
